@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="member">
+
+
+<insert id="insertMember">
+	INSERT INTO tbl_member(userId, userPw, userName, userEmail) values(#{userId}, #{userPw}, #{userName}, #{userEmail} )
+</insert>
+	
+	<select id="loginCheck" resultType="String">
+		SELECT userName FROM tbl_member
+		WHERE userId = #{userId} AND userPw = #{userPw}
+	</select>
+	
+	<select id="viewMember" resultType="com.example.spring02.model.member.dto.MemberVO">
+		SELECT 
+			userId,
+			userPw,
+		    userName,
+			userEmail,
+		    userRegdate
+		FROM tbl_member
+		WHERE userId = #{userId}
+	</select>
+	
+	<update id="updateMember">
+		UPDATE tbl_member 
+		set
+			userPw = #{userPw}, userName=#{userName}, userEmail = #{userEmail} where userId = #{userId}
+	</update>
+	
+	<delete id="deleteMember">
+		DELETE FROM tbl_member WHERE userId = #{userId}
+	</delete>
+	
+	<select id="checkPw" resultType="int">
+		SELECT COUNT(*) FROM tbl_member WHERE userId = #{userId} AND userPw = #{userPw}
+	</select>
+	
+	<!-- 페이징 sql -->
+	<sql id="pagingHeader">
+		SELECT * FROM (
+			SELECT ROWNUM AS rn, A.* FROM (
+	</sql>
+	<sql id="pagingFooter">
+			) A
+		) WHERE rn BETWEEN #{start} AND #{end}
+	</sql>
+
+</mapper>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="cart">
+	<!-- 1. 장바구니 추가 -->
+	<insert id="insertCart">
+		INSERT INTO tbl_cart(userId, productId, amount) 
+		VALUES ( #{userId}, #{productId}, #{amount} )
+	</insert>
+	<!-- 2. 장바구니 목록 -->
+	<select id="listCart" resultType="com.example.spring02.model.shop.dto.CartVO">
+		
+		SELECT
+			c.cartId , 
+			c.userId ,
+			p.productId ,
+			m.userName , 
+			p.productName , 
+			c.amount, 
+			p.productPrice , 
+			(p.productPrice * amount) money
+		FROM
+			tbl_member m, tbl_product p, tbl_cart c
+		WHERE m.userId = c.userId
+			AND p.productId = c.productId
+			AND c.userId = #{userId}
+		ORDER BY
+			c.cartId
+		
+		<!--  	
+		SELECT
+			p.product_id AS productId,
+			p.product_name AS productName, 
+			product_price AS productPrice,
+			SUM(amount) amount, 
+			SUM(product_price * amount) money
+		FROM
+			tbl_member m, tbl_product p, tbl_cart c
+		WHERE 
+			m.user_id = c.user_id 
+		AND p.product_id = c.product_id
+		AND m.user_id = #{userId} 
+		GROUP BY p.product_id, p.product_name, p.product_price
+		ORDER BY amount DESC
+		 -->	
+	</select>
+	
+	<!-- 3. 장바구니 전체 금액 -->
+	<select id="sumMoney" resultType="int">
+		SELECT IFNULL(SUM(p.productPrice * amount), 0) money
+		FROM 
+		  tbl_cart c, tbl_product p
+		WHERE 
+		  c.productId = p.productId AND c.userId = #{userId}
+	</select>
+	
+	<!-- 4. 장바구니 수정 -->
+	<update id="modifyCart">
+		UPDATE tbl_cart	SET amount = #{amount} 
+		WHERE userId= #{userId} AND productId = #{productId}
+	</update>
+	
+	
+	<!-- 5. 장바구니 삭제 -->
+	<delete id="deleteCart">
+		DELETE FROM tbl_cart WHERE cartId = #{cartId}
+	</delete>
+	
+	<!-- 6. 장바구니에 기존의 상품이 존재하는지 확인 -->
+	<select id="countCart" resultType="int">
+		SELECT COUNT(*) FROM tbl_cart 
+		WHERE userId= #{userId} AND productId = #{productId}
+	</select>
+	
+	<!-- 7. 장바구니에 기존의 상품이 존재하면 수정 -->
+	<update id="updateCart">
+		UPDATE tbl_cart	SET amount = amount + #{amount} 
+		WHERE userId= #{userId} AND productId = #{productId}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
